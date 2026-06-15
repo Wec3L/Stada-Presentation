@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+
+.env*
+!.env.example
+
+*.log
+qa-*.png
+pnpm.cjs
+npm-latest.tgz
+.tools/
