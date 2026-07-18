@@ -5,8 +5,10 @@ import {
   BrainCircuit,
   Building2,
   ChartNoAxesCombined,
+  ChevronLeft,
   ChevronRight,
   FileText,
+  Languages,
   Layers3,
   LineChart,
   Megaphone,
@@ -466,251 +468,284 @@ function Opportunity() {
   );
 }
 
-function WebsiteRedesign() {
-  const caseStudyRef = useRef<HTMLElement | null>(null);
-  const visualRef = useRef<HTMLDivElement | null>(null);
-  const revealLayerRef = useRef<HTMLDivElement | null>(null);
-  const portalRingRef = useRef<HTMLDivElement | null>(null);
-  const portalLightRef = useRef<HTMLDivElement | null>(null);
-  const futureLayerRef = useRef<HTMLDivElement | null>(null);
-  const oldImageRef = useRef<HTMLImageElement | null>(null);
-  const newImageRef = useRef<HTMLImageElement | null>(null);
-  const cursorGlowRef = useRef<HTMLDivElement | null>(null);
+const websiteComparisons = [
+  {
+    title: "Homepage",
+    before: "/images/old-home-stada-kz.png",
+    after: "/images/new-home-stada-kz.png"
+  },
+  {
+    title: "Product Catalogue",
+    before: "/images/old-products-stada-kz.png",
+    after: "/images/new-products-stada-kz.png"
+  },
+  {
+    title: "Product Detail",
+    before: "/images/old-product-stada-kz.png",
+    after: "/images/new-product-stada-kz.png"
+  }
+];
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+const redesignBenefits: Array<{
+  title: string;
+  icon: LucideIcon;
+}> = [
+  {
+    title: "Modern Visual Identity",
+    icon: Sparkles
+  },
+  {
+    title: "Improved User Experience",
+    icon: MonitorSmartphone
+  },
+  {
+    title: "Full Localization",
+    icon: Languages
+  }
+];
 
-    const section = caseStudyRef.current;
-    const visual = visualRef.current;
-    const revealLayer = revealLayerRef.current;
-    const portalRing = portalRingRef.current;
-    const portalLight = portalLightRef.current;
-    const futureLayer = futureLayerRef.current;
-    const oldImage = oldImageRef.current;
-    const newImage = newImageRef.current;
-    const cursorGlow = cursorGlowRef.current;
+const compactFeatureReveal: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+  }
+};
 
-    if (!section || !visual || !revealLayer || !portalRing || !portalLight || !futureLayer || !oldImage || !newImage || !cursorGlow) return;
+const transformationSequence = websiteComparisons.flatMap((comparison, pairIndex) => [
+  {
+    id: `${pairIndex}-before`,
+    pairIndex,
+    title: comparison.title,
+    state: "before" as const,
+    stateLabel: "Current State",
+    image: comparison.before
+  },
+  {
+    id: `${pairIndex}-after`,
+    pairIndex,
+    title: comparison.title,
+    state: "after" as const,
+    stateLabel: "Future Experience",
+    image: comparison.after
+  }
+]);
 
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (!isDesktop || reduceMotion) {
-      gsap.set(revealLayer, { clipPath: "circle(220% at 50% 50%)" });
-      gsap.set([portalRing, portalLight], { autoAlpha: 0 });
-      gsap.set(futureLayer, { autoAlpha: 1, y: 0, scale: 1 });
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      gsap.set(revealLayer, { clipPath: "circle(0% at 50% 50%)" });
-      gsap.set(portalRing, { autoAlpha: 0, scale: 0.18 });
-      gsap.set(portalLight, { autoAlpha: 0, scale: 0.4 });
-      gsap.set(futureLayer, { autoAlpha: 0, y: 10, scale: 0.99 });
-      gsap.set(oldImage, { scale: 1, x: 0, filter: "saturate(1) contrast(1) blur(0px)" });
-      gsap.set(newImage, { scale: 1, x: 0, filter: "saturate(1) contrast(1) blur(0px)" });
-
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "+=320%",
-          scrub: 0.9,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true
-        }
-      });
-
-      timeline
-        .to(portalRing, { autoAlpha: 1, scale: 0.34, ease: "power2.out", duration: 0.16 }, 0.06)
-        .to(portalLight, { autoAlpha: 1, scale: 0.72, ease: "power2.out", duration: 0.2 }, 0.08)
-        .to(revealLayer, { clipPath: "circle(220% at 50% 50%)", ease: "none", duration: 0.9 }, 0)
-        .to(portalRing, { scale: 6.6, autoAlpha: 0.88, ease: "none", duration: 0.74 }, 0.16)
-        .to(portalLight, { scale: 7.8, autoAlpha: 0.38, ease: "none", duration: 0.74 }, 0.16)
-        .to([portalRing, portalLight], { autoAlpha: 0, ease: "power2.out", duration: 0.16 }, 0.88)
-        .to(oldImage, { x: -12, scale: 0.99, opacity: 0, filter: "saturate(0.9) contrast(0.96) blur(0px)", ease: "none", duration: 0.9 }, 0)
-        .to(newImage, { x: 0, scale: 1.015, filter: "saturate(1.04) contrast(1.02) blur(0px)", ease: "none", duration: 1 }, 0)
-        .to(futureLayer, { autoAlpha: 1, y: 0, scale: 1, ease: "power2.out", duration: 0.24 }, 0.76);
-
-      const mouseX = gsap.quickTo(cursorGlow, "x", { duration: 0.45, ease: "power3.out" });
-      const mouseY = gsap.quickTo(cursorGlow, "y", { duration: 0.45, ease: "power3.out" });
-      const oldShift = gsap.quickTo(oldImage, "y", { duration: 0.7, ease: "power3.out" });
-      const newShift = gsap.quickTo(newImage, "y", { duration: 0.7, ease: "power3.out" });
-      const ringX = gsap.quickTo(portalRing, "x", { duration: 0.45, ease: "power3.out" });
-      const ringY = gsap.quickTo(portalRing, "y", { duration: 0.45, ease: "power3.out" });
-      const lightX = gsap.quickTo(portalLight, "x", { duration: 0.55, ease: "power3.out" });
-      const lightY = gsap.quickTo(portalLight, "y", { duration: 0.55, ease: "power3.out" });
-
-      const handlePointerMove = (event: PointerEvent) => {
-        const rect = visual.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const nx = x / rect.width - 0.5;
-        const ny = y / rect.height - 0.5;
-
-        mouseX(x);
-        mouseY(y);
-        ringX(nx * 18);
-        ringY(ny * 18);
-        lightX(nx * 28);
-        lightY(ny * 28);
-
-        if ((timeline.scrollTrigger?.progress ?? 0) > 0.82) {
-          oldShift(ny * -8);
-          gsap.to(oldImage, { x: -34 + nx * -10, duration: 0.7, ease: "power3.out", overwrite: "auto" });
-          newShift(ny * 12);
-          gsap.to(newImage, { x: 18 + nx * 16, duration: 0.7, ease: "power3.out", overwrite: "auto" });
-        }
-      };
-
-      const handlePointerLeave = () => {
-        ringX(0);
-        ringY(0);
-        lightX(0);
-        lightY(0);
-        oldShift(0);
-        newShift(0);
-      };
-
-      visual.addEventListener("pointermove", handlePointerMove);
-      visual.addEventListener("pointerleave", handlePointerLeave);
-
-      return () => {
-        visual.removeEventListener("pointermove", handlePointerMove);
-        visual.removeEventListener("pointerleave", handlePointerLeave);
-      };
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
+function TransformationStage({
+  activeStep,
+  onPrevious,
+  onNext,
+  onSelect
+}: {
+  activeStep: number;
+  onPrevious: () => void;
+  onNext: () => void;
+  onSelect: (index: number) => void;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const currentStep = transformationSequence[activeStep];
+  const nextStep = transformationSequence[(activeStep + 1) % transformationSequence.length];
+  const transitionDuration = shouldReduceMotion ? 0.2 : 0.68;
 
   return (
-    <section id="website-redesign" className="relative bg-white">
-      <div className="md:hidden px-[var(--page-x)] py-28">
-        <SectionIntro
-          eyebrow="Main Case Study"
-          title="From Current State to Future Experience"
-          text="This redesign is more than a visual upgrade. It shows how digital assets can become scalable, interactive and business-ready experiences."
-        />
+    <div className="relative mx-auto aspect-[1860/925] w-full max-w-[70rem] overflow-hidden rounded-2xl bg-white shadow-[0_20px_64px_rgba(15,23,42,0.13)] ring-1 ring-slate-900/[0.04] md:rounded-[1.35rem]">
+      <Image
+        src={nextStep.image}
+        alt=""
+        fill
+        aria-hidden="true"
+        sizes="(max-width: 767px) calc(100vw - 2rem), 70rem"
+        className="pointer-events-none select-none object-cover object-left opacity-0"
+      />
 
-        <div className="mx-auto mt-12 grid max-w-4xl gap-7">
-          {[
-            { label: "Current State", src: "/images/case-study-current-state.png" },
-            { label: "Future Experience", src: "/images/case-study-future-experience.png" }
-          ].map((screen) => (
-            <div
-              key={screen.label}
-              className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-2 shadow-[0_24px_80px_rgba(15,23,42,0.12)]"
-            >
-              <div className="flex h-10 items-center gap-2 rounded-t-[1.25rem] border-b border-slate-200/80 bg-slate-50/90 px-4">
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                <span className="ml-auto text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{screen.label}</span>
-              </div>
-              <Image
-                src={screen.src}
-                alt={`${screen.label} screenshot`}
-                width={1857}
-                height={925}
-                sizes="(max-width: 767px) calc(100vw - 2.5rem), 50vw"
-                className="aspect-[2/1] w-full rounded-b-[1.25rem] object-cover"
-              />
-            </div>
-          ))}
-        </div>
+      <AnimatePresence initial={false} mode="sync">
+        <motion.div
+          key={currentStep.id}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.012, y: 3 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.988, y: -2 }}
+          transition={{ duration: transitionDuration, ease: [0.22, 1, 0.36, 1] }}
+          drag={shouldReduceMotion ? false : "x"}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.06}
+          dragMomentum={false}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -48) onNext();
+            if (info.offset.x > 48) onPrevious();
+          }}
+          className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
+        >
+          <Image
+            src={currentStep.image}
+            alt={`${currentStep.title} ${currentStep.stateLabel.toLowerCase()} website screenshot`}
+            fill
+            priority={activeStep < 2}
+            sizes="(max-width: 767px) calc(100vw - 2rem), 70rem"
+            draggable={false}
+            className="select-none object-cover object-left"
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="pointer-events-none absolute left-3 top-3 z-20 md:left-4 md:top-4" aria-live="polite">
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={currentStep.id}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -3 }}
+            transition={{ duration: shouldReduceMotion ? 0.15 : 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-2 rounded-full bg-white/90 px-2.5 py-1.5 shadow-[0_5px_18px_rgba(15,23,42,0.11)] backdrop-blur-xl"
+          >
+            <span className="text-[0.64rem] font-semibold text-ink/70 md:text-[0.68rem]">{currentStep.title}</span>
+            <span className="h-3 w-px bg-slate-300" />
+            <span className={`h-1.5 w-1.5 rounded-full ${currentStep.state === "after" ? "bg-blue-600" : "bg-slate-400"}`} />
+            <span className={`text-[0.62rem] font-semibold uppercase tracking-[0.16em] ${currentStep.state === "after" ? "text-blue-700" : "text-slate-500"}`}>
+              {currentStep.stateLabel}
+            </span>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <section ref={caseStudyRef} className="relative hidden min-h-screen overflow-hidden md:block">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(14,132,255,0.16),transparent_34%),linear-gradient(180deg,#ffffff_0%,#f7fbff_48%,#ffffff_100%)]" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[52rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-100/50 blur-3xl" />
+      <button
+        type="button"
+        onClick={onPrevious}
+        aria-label="Show previous transformation state"
+        className="absolute left-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-[0_7px_24px_rgba(15,23,42,0.14)] ring-1 ring-white/80 backdrop-blur-xl transition duration-300 hover:-translate-y-[55%] hover:text-blue-700 hover:shadow-[0_10px_30px_rgba(15,23,42,0.18)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 md:left-3"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onNext}
+        aria-label="Show next transformation state"
+        className="absolute right-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink/90 text-white shadow-[0_7px_24px_rgba(15,23,42,0.18)] ring-1 ring-white/15 backdrop-blur-xl transition duration-300 hover:-translate-y-[55%] hover:bg-blue-600 hover:shadow-[0_10px_30px_rgba(10,132,255,0.24)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 md:right-3"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
 
-        <div className="relative z-10 flex min-h-screen items-center justify-center py-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-120px" }}
-            variants={stagger}
-            className="absolute left-1/2 top-8 z-20 mx-auto w-full max-w-4xl -translate-x-1/2 px-[var(--page-x)] text-center"
-          >
-            <motion.div
-              variants={fadeUp}
-              className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-white/70 px-4 py-1.5 text-sm font-semibold text-blue-700 shadow-sm backdrop-blur-xl"
-            >
-              <Sparkles className="h-4 w-4" />
-              Main Case Study
-            </motion.div>
-            <motion.h2 variants={fadeUp} className="text-balance text-4xl font-semibold leading-[0.92] text-ink md:text-[2.85rem] lg:text-nowrap lg:text-[2.8rem]">
-              From Current State to Future Experience
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-4xl text-base leading-6 text-graphite/76 md:text-lg md:leading-7">
-              This redesign turns digital assets into scalable, interactive and business-ready experiences.
-            </motion.p>
-          </motion.div>
+      <div
+        className="absolute bottom-2.5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/90 px-3 py-2 shadow-[0_5px_20px_rgba(15,23,42,0.13)] backdrop-blur-xl"
+        role="tablist"
+        aria-label="Transformation sequence"
+      >
+        {websiteComparisons.map((comparison, pairIndex) => (
+          <div key={comparison.title} className="flex items-center gap-1">
+            {(["before", "after"] as const).map((state, stateIndex) => {
+              const stepIndex = pairIndex * 2 + stateIndex;
+              const isActive = stepIndex === activeStep;
+              const isComplete = stepIndex < activeStep;
 
-          <div className="mx-auto w-[94vw] max-w-[112rem] pt-14">
-            <div
-              ref={visualRef}
-              className="group relative h-[64vh] min-h-[28rem] overflow-hidden rounded-[0.25rem] bg-transparent shadow-[0_36px_120px_rgba(15,23,42,0.10)]"
-            >
-              <div
-                ref={cursorGlowRef}
-                className="pointer-events-none absolute left-0 top-0 z-30 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(125,211,252,0.28),rgba(14,165,233,0.10)_36%,transparent_68%)] opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100"
-                aria-hidden="true"
-              />
-              <div className="absolute right-6 top-6 z-[5] rounded-full border border-white/20 bg-black/36 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/86 shadow-2xl backdrop-blur-xl">
-                Current State
-              </div>
-              <Image
-                ref={oldImageRef}
-                src="/images/case-study-current-state.png"
-                alt="Current State website screenshot"
-                fill
-                sizes="94vw"
-                className="object-contain will-change-transform drop-shadow-[0_30px_80px_rgba(15,23,42,0.12)]"
-              />
-
-              <div
-                ref={portalLightRef}
-                className="pointer-events-none absolute left-1/2 top-1/2 z-[8] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(191,239,255,0.42)_0%,rgba(56,189,248,0.22)_32%,rgba(14,132,255,0.08)_58%,transparent_72%)] blur-2xl"
-                aria-hidden="true"
-              />
-              <div
-                ref={portalRingRef}
-                className="pointer-events-none absolute left-1/2 top-1/2 z-20 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/80 shadow-[0_0_30px_rgba(186,230,253,0.96),0_0_90px_rgba(14,165,233,0.46),inset_0_0_42px_rgba(255,255,255,0.34)]"
-                aria-hidden="true"
-              >
-                <span className="absolute -inset-8 rounded-full border border-blue-200/20 blur-[2px]" />
-                <span className="absolute inset-5 rounded-full border border-white/42" />
-              </div>
-
-              <div ref={revealLayerRef} className="absolute -inset-1 z-10 overflow-hidden bg-white will-change-[clip-path]" style={{ clipPath: "circle(0% at 50% 50%)" }}>
-                <Image
-                  ref={newImageRef}
-                  src="/images/case-study-future-experience.png"
-                  alt="Future Experience website screenshot"
-                  fill
-                  sizes="94vw"
-                  className="object-contain will-change-transform drop-shadow-[0_34px_90px_rgba(14,116,190,0.13)]"
+              return (
+                <button
+                  key={state}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={`Show ${comparison.title} ${state === "before" ? "current state" : "future experience"}`}
+                  onClick={() => onSelect(stepIndex)}
+                  className={`h-1.5 rounded-full transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 ${
+                    isActive
+                      ? state === "after"
+                        ? "w-7 bg-blue-600"
+                        : "w-7 bg-slate-600"
+                      : isComplete
+                        ? "w-4 bg-blue-300"
+                        : "w-4 bg-slate-300"
+                  }`}
                 />
-                <div className="absolute left-6 top-6 rounded-full border border-white/42 bg-white/74 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-800 shadow-2xl backdrop-blur-xl">
-                  Future Experience
-                </div>
-                <div
-                  ref={futureLayerRef}
-                  className="pointer-events-none absolute inset-0 opacity-0"
-                  aria-hidden="true"
-                >
-                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white/24 to-transparent" />
-                  <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-300/12 blur-3xl" />
-                  {/* Floating product overlay placeholder: add a transparent PNG product layer here when available. */}
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function WebsiteRedesign() {
+  const [activeStep, setActiveStep] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+
+  const showPrevious = () => {
+    setActiveStep((current) => (current - 1 + transformationSequence.length) % transformationSequence.length);
+  };
+
+  const showNext = () => {
+    setActiveStep((current) => (current + 1) % transformationSequence.length);
+  };
+
+  return (
+    <section id="website-redesign" className="relative isolate overflow-hidden bg-white px-4 pb-2 pt-4 sm:px-6 md:px-5 lg:min-h-[100svh]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgba(10,132,255,0.11),transparent_31rem),linear-gradient(180deg,#ffffff_0%,#f7fbff_48%,#ffffff_100%)]" />
+      <div className="pointer-events-none absolute left-[-12rem] top-[30%] h-[32rem] w-[32rem] rounded-full bg-blue-100/45 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-14rem] top-[63%] h-[36rem] w-[36rem] rounded-full bg-cyan-100/40 blur-3xl" />
+
+      <div className="relative mx-auto max-w-[118rem]">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-120px" }}
+          variants={stagger}
+          className="mx-auto max-w-5xl text-center"
+        >
+          <motion.div
+            variants={fadeUp}
+            className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-white/70 px-3.5 py-1 text-xs font-semibold text-blue-700 shadow-sm backdrop-blur-xl"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Main Case Study
+          </motion.div>
+          <motion.h2 variants={fadeUp} className="text-balance text-4xl font-semibold leading-[0.92] text-ink md:text-[2.85rem] lg:text-nowrap lg:text-[2.8rem]">
+            From Current State to Future Experience
+          </motion.h2>
+          <motion.p variants={fadeUp} className="mx-auto mt-2 max-w-4xl text-base leading-6 text-graphite/76">
+            This redesign turns digital assets into scalable, interactive and business-ready experiences.
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-90px" }}
+          transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-3"
+        >
+          <TransformationStage
+            activeStep={activeStep}
+            onPrevious={showPrevious}
+            onNext={showNext}
+            onSelect={setActiveStep}
+          />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-70px" }}
+          variants={compactFeatureReveal}
+          className="mx-auto mt-2 max-w-[70rem] overflow-hidden rounded-2xl border border-white/80 bg-white/58 px-3 py-2 shadow-[0_8px_28px_rgba(15,23,42,0.045)] backdrop-blur-xl md:rounded-[1.35rem]"
+        >
+          <div className="grid gap-1 md:grid-cols-3 md:gap-0">
+            {redesignBenefits.map(({ title, icon: Icon }, index) => (
+              <motion.div
+                key={title}
+                whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className={`flex items-center justify-center gap-2.5 px-3 py-1.5 text-center ${
+                  index > 0 ? "md:border-l md:border-slate-200/80" : ""
+                }`}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                <span className="whitespace-nowrap text-xs font-semibold text-ink/84 md:text-[0.78rem] lg:text-sm">{title}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }
